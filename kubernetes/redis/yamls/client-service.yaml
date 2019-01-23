@@ -1,0 +1,13 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  ports:
+  - name: http
+    port: 6379
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: app
+  type: ClusterIP

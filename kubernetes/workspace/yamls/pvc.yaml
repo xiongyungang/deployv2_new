@@ -1,0 +1,12 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+  storageClassName: nfs-ssd
+  resources:
+    requests:
+      storage: 1Gi

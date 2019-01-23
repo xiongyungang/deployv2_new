@@ -1,0 +1,42 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - env:
+        - name: MEMCACHED_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: MEMCACHED_USERNAME
+              name: value
+        - name: MEMCACHED_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: MEMCACHED_PASSWORD
+              name: value
+        image: harbor.oneitfarm.com/bitnami/memcached:1.5.11
+        imagePullPolicy: IfNotPresent
+        name: memcached
+        ports:
+        - containerPort: 11211
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 1Gi
+          requests:
+            cpu: 1m
+            memory: 1Gi
+      imagePullSecrets:
+      - name: aliyun-registry-vpc

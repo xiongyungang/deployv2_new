@@ -1,0 +1,12 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  ports:
+  - name: http
+    port: 11211
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: app

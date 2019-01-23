@@ -1,0 +1,17 @@
+#定义流程，build并行处理
+stages:
+  - build
+
+#定义job
+build:image:
+  image: docker:latest
+  stage: build
+  before_script:
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
+  script:
+    - docker build --pull -t "$DOCKER_REGISTRY/idg/deployv2" ./
+    - docker push "$DOCKER_REGISTRY/idg/deployv2"
+  only:
+    - master
+  tags:
+    - IDG

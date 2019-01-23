@@ -1,0 +1,10 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  ports:
+  - name: name
+    port: 3306
+  selector:
+    app: app

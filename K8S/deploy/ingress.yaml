@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: deployv2
+  labels:
+    app: deployv2
+spec:
+  tls:
+    - hosts:
+        - deployv2.oneitfarm.com
+      secretName: oneitfarm-secret
+  rules:
+    - host: deployv2.oneitfarm.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: deployv2
+              servicePort: http

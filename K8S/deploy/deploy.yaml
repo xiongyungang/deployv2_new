@@ -1,0 +1,74 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: deployv2 # 项目部署名称
+spec:
+  replicas: 2
+  minReadySeconds: 30
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      name: deployv2 # 项目部署名称
+      labels:
+        app: deployv2 # 项目部署名称
+    spec:
+      imagePullSecrets:
+      - name: aliyun-registry-vpc  # 镜像默认都上传到阿里云镜像库，私有。secret 创建见文档,注意名称。
+      containers:
+      - name: deployv2 # 项目部署名称
+        imagePullPolicy: Always
+        image: registry-vpc.cn-shanghai.aliyuncs.com/idg/deployv2 # 项目部署image
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 2
+            memory: 1024Mi
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        env:
+          - name: ENVIRONMENT
+            value: production
+          - name: APP_NAME
+            value: 'Deploy'
+          - name: APP_ENV
+            value: 'local'
+          - name: APP_DEBUG
+            value: 'false'
+          - name: APP_URL
+            value: 'http://127.0.0.1:80'
+          - name: LOG_CHANNEL
+            value: 'stack'
+          - name: DB_CONNECTION
+              value: 'mysql'
+          - name: DB_HOST
+            value: 'deployv2-mysql-0.deployv2-mysql'
+          - name: DB_PORT
+            value: '3306'
+          - name: DB_DATABASE
+            value: 'deploy'
+          - name: DB_USERNAME
+            value: 'root'
+          - name: DB_PASSWORD
+            value: '123456'
+          - name: BROADCAST_DRIVER
+            value: 'redis'
+          - name: CACHE_DRIVER
+            value: 'redis'
+          - name: SESSION_DRIVER
+            value: 'redis'
+          - name: SESSION_LIFETIME
+            value: '120'
+          - name: QUEUE_DRIVER
+            value: 'redis'
+          - name: REDIS_HOST
+            value: 'deployv2-redis'
+          - name: REDIS_PORT
+            value: '6379'
+          - name: QUEUE_WORKER_NUM
+            value: '1'

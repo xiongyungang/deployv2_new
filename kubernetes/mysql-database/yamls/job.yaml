@@ -1,0 +1,14 @@
+metadata:
+  name: name
+spec:
+  template:
+    metadata:
+      name: name
+    spec:
+      containers:
+      - name: value
+        image: value
+        imagePullPolicy: Always
+        env: value
+      restartPolicy: Never
+  backoffLimit: 1

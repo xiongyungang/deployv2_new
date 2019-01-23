@@ -1,0 +1,13 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 27017
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    app: app

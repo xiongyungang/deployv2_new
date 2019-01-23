@@ -1,0 +1,2 @@
+[mysqld]
+server-id=@@SERVER_ID@@

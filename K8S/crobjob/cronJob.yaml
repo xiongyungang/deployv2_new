@@ -1,0 +1,21 @@
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  name: devployv2_crobjob
+  labels:
+    app: deployv2
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: harbor.oneitfarm.com/deployv2/checkall:php-7.1
+            image: alpine
+            args:
+            - php
+            - /opt/ci123/www/html/artisan
+            - check
+          restartPolicy: OnFailure
+      backoffLimit: 1

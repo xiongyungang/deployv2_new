@@ -1,0 +1,57 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  serviceName: serviceName
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - env:
+        - name: USERNAME
+          value: value
+        - name: PASSWORD
+          value: value
+        - name: HOST
+          value: value
+        - name: PORT
+          value: value
+        image: harbor.oneitfarm.com/mongodb/mongo:3.2
+        imagePullPolicy: Always
+        name: mongodb
+        ports:
+        - containerPort: 27017
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 1m
+            memory: 1Mi
+        volumeMounts:
+        - mountPath: /etc/mongodb
+          name: data
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app: app
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: nfs-ssd

@@ -1,0 +1,19 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  ports:
+  - name: amqp
+    port: 5672
+  - name: http
+    port: 15672
+    protocol: TCP
+    targetPort: http
+  - name: epmd
+    port: 4369
+  - name: rabbitmq-dist
+    port: 25672
+  clusterIP: None
+  selector:
+    app: name

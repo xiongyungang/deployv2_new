@@ -1,0 +1,52 @@
+metadata:
+  annotations:
+  labels:
+  name:
+spec:
+  replicas:
+  selector:
+    matchLabels:
+  template:
+    metadata:
+      labels:
+    spec:
+      imagePullSecrets:
+      - name:
+      containers:
+      - name: deployment
+        imagePullPolicy: IfNotPresent
+        image:
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        env:
+        envFrom:
+        - configMapRef:
+            name:
+        resources:
+          limits:
+            cpu:
+            memory:
+          requests:
+            cpu:
+            memory:
+        volumeMounts:
+        - mountPath: /var/run/cidata-events/
+          name: cidata-cache
+        - mountPath:
+          name: config-volume
+      - name: cidata-report
+        imagePullPolicy: IfNotPresent
+        image:
+        volumeMounts:
+        - mountPath: /var/run/cidata-events/
+          name: cidata-cache
+        - mountPath:
+          name: config-volume
+      volumes:
+      - emptyDir:
+        name: cidata-cache
+      - configMap:
+          name:
+        name: config-volume

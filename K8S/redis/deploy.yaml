@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: deployv2-redis # 项目部署名称
+spec:
+  replicas: 1
+  minReadySeconds: 30
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      name: deployv2-redis # 项目部署名称
+      labels:
+        app: deployv2-redis # 项目部署名称
+    spec:
+      imagePullSecrets:
+      - name: aliyun-registry-vpc  # 镜像默认都上传到阿里云镜像库，私有。secret 创建见文档,注意名称。
+      containers:
+      - name: deployv2-redis # 项目部署名称
+        image: redis:4.0.10-alpine # 项目部署image
+        volumeMounts:
+        - mountPath: /data
+          subPath: redis
+          name: deployv2-redis
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 2
+            memory: 1024Mi
+        ports:
+        - containerPort: 6379
+          protocol: TCP
+      volumes:
+      - name: deployv2-redis
+        persistentVolumeClaim:
+          claimName: deployv2-redis

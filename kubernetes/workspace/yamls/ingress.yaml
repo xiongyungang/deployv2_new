@@ -1,0 +1,13 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  rules:
+    - host: host
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: name
+              servicePort: http

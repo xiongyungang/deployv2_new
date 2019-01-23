@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: deployv2-redis #项目部署名称
+  labels:
+     app: deployv2-redis #项目部署名称
+spec:
+ ports:
+  - name: http
+    port: 6379
+ selector:
+  app: deployv2-redis #项目部署名称

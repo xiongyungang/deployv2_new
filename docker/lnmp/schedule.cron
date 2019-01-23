@@ -1,0 +1,1 @@
+* * * * * root bash -l -c "php /opt/ci123/www/html/artisan schedule:run"

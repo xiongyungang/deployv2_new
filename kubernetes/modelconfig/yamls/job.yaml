@@ -1,0 +1,21 @@
+metadata:
+  name:
+  labels:
+  annotations:
+spec:
+  template:
+    spec:
+      containers:
+      - name: job
+        image:
+        env:
+        command: ["/bin/bash", "/etc/my_init.d/init_model.sh"]
+        volumeMounts:
+        - mountPath: /tmp/.composer/cache
+          name: composer-cache
+      restartPolicy: Never
+      volumes:
+      - name: composer-cache
+        persistentVolumeClaim:
+          claimName: composer-cache
+  backoffLimit: 1

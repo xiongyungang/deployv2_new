@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deployv2-mysql
+  labels:
+    app: deployv2-mysql
+data:
+  master.cnf: |
+    # Apply this config only on the master.
+    [mysqld]
+    innodb_use_native_aio = 0
+    default_time_zone = '+08:00'
+    sql_mode = ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    log-bin
+    skip_name_resolve
+  slave.cnf: |
+    # Apply this config only on slaves.
+    [mysqld]
+    innodb_use_native_aio = 0
+    default_time_zone = '+08:00'
+    sql_mode = ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    super-read-only
+    skip_name_resolve
+  server-id.cnf: |
+    [mysqld]
+    server-id=@@SERVER_ID@@
+  create-replication-user.sql: |
+    CREATE USER IF NOT EXISTS '@@REPLICATION_USER@@' IDENTIFIED BY '@@REPLICATION_PASSWORD@@';
+    GRANT PROCESS, RELOAD, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO '@@REPLICATION_USER@@';
+    FLUSH PRIVILEGES;

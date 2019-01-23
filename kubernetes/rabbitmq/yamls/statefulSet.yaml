@@ -1,0 +1,85 @@
+metadata:
+  name: rabbitmq
+  labels:
+    app: app
+spec:
+  serviceName: "rabbitmq"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3.7.8-management
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - bash
+              - "-c"
+              - |
+                if [ -z "$(grep rabbitmq /etc/resolv.conf)" ]; then
+                sed "s/^search \([^ ]\+\)/search ${MY_POD_NAME%-*}.\1 \1/" /etc/resolv.conf > /etc/resolv.conf.new;
+                cat /etc/resolv.conf.new > /etc/resolv.conf;
+                rm /etc/resolv.conf.new;
+                fi;
+                #检查集群状态
+                until rabbitmqctl node_health_check; do sleep 1; done;
+                #加入集群，设置同步策略（镜像队列）
+                if [ -z "$(rabbitmqctl cluster_status | grep ${MY_POD_NAME%-*}-0)" ]; then
+                rabbitmqctl stop_app;
+                rabbitmqctl reset;
+                rabbitmqctl join_cluster rabbit@${MY_POD_NAME%-*}-0 --ram;
+                rabbitmqctl start_app;
+                rabbitmqctl set_policy mirror-queues "^" '{"ha-mode":"all","ha-sync-mode":"automatic"}'
+                fi;
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              key: RABBITMQ_DEFAULT_USER
+              name: value
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              key: RABBITMQ_DEFAULT_PASS
+              name: value
+        - name: RABBITMQ_ERLANG_COOKIE
+          valueFrom:
+            secretKeyRef:
+              key: RABBITMQ_ERLANG_COOKIE
+              name: value
+        - name: RABBITMQ_NODENAME
+          value: "rabbit@$(MY_POD_NAME)"
+        ports:
+        - containerPort: 5672
+          name: amqp
+        - containerPort: 15672
+          name: http
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: data-mq
+  volumeClaimTemplates:
+  - metadata:
+      name: data-mq
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: nfs-ssd

@@ -1,0 +1,30 @@
+metadata:
+  name:
+  labels:
+  annotations:
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name:
+      containers:
+      - name: job
+        image:
+        imagePullPolicy: Always
+        env:
+        command: ["/sbin/my_init", "--", "ls", "-l"]
+        volumeMounts:
+        - mountPath: /tmp/.composer/cache
+          name: composer-cache
+        - mountPath: /opt/ci123/www/html
+          subPath: odd
+          name: code-data
+      restartPolicy: Never
+      volumes:
+      - name: composer-cache
+        persistentVolumeClaim:
+          claimName: composer-cache
+      - name: code-data
+        persistentVolumeClaim:
+          claimName:
+  backoffLimit: 1

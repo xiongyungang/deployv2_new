@@ -1,0 +1,46 @@
+metadata:
+  name: name
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: REDIS_PASSWORD
+              name: value
+        - name: REDIS_CACHE_SIZE
+          value: "128"
+        image: harbor.oneitfarm.com/bitnami/redis:4.0.11
+        imagePullPolicy: IfNotPresent
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 1m
+            memory: 1Mi
+        volumeMounts:
+        - mountPath: /bitnami/redis/data
+          name: redis-data
+      imagePullSecrets:
+      - name: aliyun-registry-vpc
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: value

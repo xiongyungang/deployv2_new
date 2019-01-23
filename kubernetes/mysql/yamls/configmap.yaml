@@ -1,0 +1,6 @@
+metadata:
+  name: name
+  labels:
+    app: app
+data:
+  key: value

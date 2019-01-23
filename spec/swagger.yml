@@ -1,0 +1,630 @@
+swagger: '2.0'
+info:
+  description: Deployment And Resource Management System
+  version: 1.0.0
+  title: Deploy
+  contact:
+    email: zhoumiao@corp-ci.com
+host: '192.168.123.4:8000'
+basePath: /api
+tags:
+  - name: cluster
+    description: 集群管理
+  - name: repo
+    description: 中台应用/服务的库
+  - name: user
+    description: 中台用户
+schemes:
+  - https
+  - http
+produces:
+  - application/json
+security:
+  - token: []
+paths:
+  /clusters:
+    get:
+      tags:
+        - cluster
+      summary: 获取所有集群
+      description: ''
+      operationId: getClusters
+      parameters:
+        - in: query
+          name: channel
+          description: ''
+          type: integer
+          default: 0
+        - in: query
+          name: page
+          description: ''
+          type: integer
+          default: 1
+        - in: query
+          name: limit
+          description: ''
+          type: integer
+          default: 10
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/apiResponse'
+              - properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Cluster'
+    post:
+      tags:
+        - cluster
+      summary: 添加集群
+      description: ''
+      operationId: addCluster
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - in: formData
+          name: name
+          required: true
+          description: 集群名称
+          type: string
+        - in: formData
+          name: area
+          required: true
+          description: 集群所在区域
+          type: string
+        - in: formData
+          name: kubeconfig
+          required: true
+          description: 集群操作配置文件，$HOME/.kube/config 内容
+          type: string
+        - in: formData
+          name: channel
+          description: ''
+          type: integer
+          default: 0
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/apiResponse'
+      security:
+        - token: []
+  '/clusters/{clusterId}':
+    get:
+      tags:
+        - cluster
+      summary: 根据id获取集群
+      description: ''
+      operationId: getClusterById
+      parameters:
+        - name: clusterId
+          in: path
+          description: ''
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/apiResponse'
+              - properties:
+                  data:
+                    $ref: '#/definitions/Cluster'
+      security:
+        - token: []
+    post:
+      tags:
+        - cluster
+      summary: 更新集群
+      description: ''
+      operationId: updateClusterWithForm
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: clusterId
+          in: path
+          description: ID of cluster that needs to be updated
+          required: true
+          type: integer
+          format: int64
+        - name: name
+          in: formData
+          description: 集群名称，不能与某channel中已存在的name重名
+          required: false
+          type: string
+        - name: area
+          in: formData
+          description: 集群所在区域
+          required: false
+          type: string
+        - name: kubeconfig
+          in: formData
+          description: 集群操作配置文件，$HOME/.kube/config 内容
+          required: false
+          type: string
+        - name: channel
+          in: formData
+          description: ''
+          required: false
+          type: integer
+          default: 0
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/apiResponse'
+      security:
+        - token: []
+    delete:
+      tags:
+        - cluster
+      summary: 删除集群
+      description: 删除集群前，会自动将在该集群中创建的容器自动迁移到另外一个集群当中，优先选择相同区域的集群
+      operationId: deleteCluster
+      parameters:
+        - name: clusterId
+          in: path
+          description: ''
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/apiResponse'
+      security:
+        - token: []
+  /repos:
+    get:
+      tags:
+        - repo
+      summary: 获取所有库
+      description: ''
+      operationId: getRepos
+      parameters:
+        - in: query
+          name: channel
+          type: integer
+        - in: query
+          name: user_appkey
+          type: string
+          maxLength: 32
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/apiResponse'
+              - properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Repo'
+    post:
+      tags:
+        - repo
+      summary: 添加库
+      description: ''
+      operationId: addRepo
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: channel
+          in: formData
+          description: ''
+          type: integer
+          default: 0
+        - name: user_appkey
+          in: formData
+          description: 中台创建的应用或服务的唯一标识
+          type: string
+          maxLength: 32
+          required: true
+        - name: uniqid
+          in: formData
+          description: 应用或服务中创建的仓库的唯一标识
+          type: string
+          maxLength: 50
+          required: true
+        - name: git_ssh_url
+          in: formData
+          description: 仓库地址
+          type: string
+          maxLength: 255
+        - name: git_private_key
+          in: formData
+          description: 拉取仓库代码的密钥，以 \n 换行
+          type: string
+        - name: ssh_private_key
+          in: formData
+          description: 登录仓库部署后容器的ssh密钥，以 \n 换行
+          type: string
+        - name: image_url
+          in: formData
+          description: 运行环境的docker镜像地址
+          type: string
+        - name: type
+          in: formData
+          description: 仓库类型
+          type: string
+          default: backend
+          enum:
+            - backend
+            - frontend
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/apiResponse'
+  /users:
+    get:
+      tags:
+        - user
+      summary: 获取用户
+      description: ''
+      operationId: getUsers
+      parameters:
+        - in: query
+          name: channel
+          description: ''
+          type: integer
+          default: 0
+        - in: query
+          name: page
+          description: ''
+          type: integer
+          default: 1
+        - in: query
+          name: limit
+          description: ''
+          type: integer
+          default: 10
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/apiResponse'
+              - properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/definitions/User'
+    post:
+      tags:
+        - user
+      summary: 添加用户
+      description: ''
+      operationId: createUser
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - in: formData
+          name: account_id
+          required: true
+          description: 中台帐号id
+          type: string
+          maxLength: 32
+        - in: formData
+          name: ssh_private_key
+          required: false
+          description: 用于登录开发容器的密钥，以 '\n' 换行
+          type: string
+        - in: formData
+          name: channel
+          required: false
+          description: ''
+          type: integer
+          default: 0
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/apiResponse'
+  /users/findByAccountId:
+    get:
+      tags:
+        - user
+      summary: 根据中台帐号id获取用户信息
+      description: ''
+      operationId: findUsersByAccountId
+      parameters:
+        - name: account_id
+          in: query
+          description: ''
+          required: true
+          type: string
+          maxLength: 32
+        - name: channel
+          in: query
+          required: false
+          description: ''
+          type: integer
+          default: 0
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/apiResponse'
+              - properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/definitions/User'
+  '/users/{userId}':
+    get:
+      tags:
+        - user
+      summary: 获得用户信息
+      description: ''
+      operationId: getUser
+      parameters:
+        - name: userId
+          in: path
+          description: ''
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/apiResponse'
+              - properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/definitions/User'
+    post:
+      tags:
+        - user
+      summary: 更新用户信息
+      description: ''
+      operationId: updateUser
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: userId
+          in: path
+          description: ''
+          required: true
+          type: integer
+        - name: account_id
+          in: formData
+          description: ''
+          required: false
+          type: string
+          maxLength: 32
+        - name: ssh_private_key
+          in: formData
+          description: ''
+          required: false
+          type: string
+        - name: channel
+          in: formData
+          description: ''
+          required: false
+          type: integer
+          default: 0
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/apiResponse'
+      security:
+        - token: []
+    delete:
+      tags:
+        - user
+      summary: 删除用户
+      description: 删除用户，会将用户创建的所有资源都释放掉，包括开发容器，开发数据库等等
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: ''
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/apiResponse'
+      security:
+        - token: []
+  /workspaces:
+    get:
+      tags:
+        - workspace
+      summary: 获取开发容器
+      description: ''
+      operationId: getWorkspaces
+      parameters:
+        - in: query
+          name: channel
+          type: integer
+          default: 0
+        - in: query
+          name: user_id
+          type: integer
+        - in: query
+          name: account_id
+          type: string
+        - in: query
+          name: page
+          description: ''
+          type: integer
+          default: 1
+        - in: query
+          name: limit
+          description: ''
+          type: integer
+          default: 10
+      responses:
+        200:
+          description: ''
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/apiResponse'
+              - properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Workspace'
+securityDefinitions:
+  token:
+    type: apiKey
+    name: Authorization
+    description: 中台应用的token
+    in: header
+definitions:
+  User:
+    description: '唯一索引: account_id,appkey,channel'
+    type: object
+    required:
+      - appkey
+      - account_id
+    properties:
+      id:
+        type: integer
+        format: int64
+      appkey:
+        type: string
+      channel:
+        type: integer
+        default: 0
+      account_id:
+        type: string
+      ssh_private_key:
+        type: string
+        default: ''
+        description: '用户登录开发者容器所用的ssh key'
+  Cluster:
+    description: '唯一索引：name,appkey,channel'
+    type: object
+    required:
+      - appkey
+      - name
+      - area
+      - kubeconfig
+    properties:
+      id:
+        type: integer
+        format: int64
+      appkey:
+        type: string
+        example: appkey
+      channel:
+        type: integer
+        example: 0
+      name:
+        type: string
+        example: 开发容器集群
+      area:
+        type: string
+        example: 阿里云华东二D区
+      kubeconfig:
+        type: string
+        example: content from ~/.kube/config
+  Repo:
+    type: object
+    required:
+      - appkey
+      - user_appkey
+      - uniqid
+    properties:
+      id:
+        type: integer
+        format: int64
+      appkey:
+        type: string
+        maxLength: 32
+      user_appkey:
+        type: string
+        maxLength: 32
+      uniqid:
+        type: string
+      git_ssh_url:
+        type: string
+      git_private_key:
+        type: string
+      ssh_private_key:
+        type: string
+      image_url:
+        type: string
+      type:
+        type: integer
+  Workspace:
+    type: object
+    required:
+      - user_id
+      - repo_id
+    properties:
+      id:
+        type: integer
+        format: int64
+      user_id:
+        type: integer
+      repo_id:
+        type: integer
+      image_url:
+        type: string
+      envs:
+        type: string
+      state:
+        type: string
+      desire_state:
+        type: string
+  Deployment:
+    type: object
+    required:
+      - app_id
+    properties:
+      id:
+        type: integer
+        format: int64
+      app_id:
+        type: integer
+      repo_id:
+        type: integer
+      image_url:
+        type: string
+      code_in_image:
+        type: integer
+      branch:
+        type: string
+      domain:
+        type: string
+      envs:
+        type: string
+      state:
+        type: string
+      desire_state:
+        type: string
+  apiResponse:
+    type: object
+    required:
+      - code
+      - msg
+    properties:
+      code:
+        type: integer
+        enum:
+          - 1
+      msg:
+        type: string
+        enum:
+          - 成功

@@ -1,0 +1,15 @@
+metadata:
+  name:
+  labels:
+spec:
+  tls:
+  - hosts:
+    secretName:
+  rules:
+  - host:
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName:
+          servicePort: 80
